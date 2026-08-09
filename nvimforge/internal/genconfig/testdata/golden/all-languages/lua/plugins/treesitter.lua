@@ -1,0 +1,35 @@
+return {
+  "nvim-treesitter/nvim-treesitter",
+  branch = "master",
+  build = ":TSUpdate",
+  opts = {
+    ensure_installed = {
+      "bash",
+      "c",
+      "cpp",
+      "dockerfile",
+      "go",
+      "gomod",
+      "gosum",
+      "gowork",
+      "javascript",
+      "lua",
+      "markdown",
+      "markdown_inline",
+      "python",
+      "query",
+      "rust",
+      "toml",
+      "tsx",
+      "typescript",
+      "vim",
+      "vimdoc",
+      "yaml",
+    },
+    highlight = { enable = true },
+    indent = { enable = true },
+  },
+  config = function(_, opts)
+    require("nvim-treesitter.configs").setup(opts)
+  end,
+}

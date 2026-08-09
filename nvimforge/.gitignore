@@ -1,0 +1,4 @@
+/dist/
+/nvimforge
+*.test
+coverage.out

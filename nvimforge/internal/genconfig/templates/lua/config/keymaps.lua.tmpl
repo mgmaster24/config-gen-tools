@@ -1,0 +1,37 @@
+local map = vim.keymap.set
+
+map("i", "jk", "<Esc>", { desc = "Exit insert mode" })
+
+map("n", "<leader>w", "<cmd>write<cr>", { desc = "Save file" })
+map("n", "<leader>q", "<cmd>quit<cr>", { desc = "Quit" })
+
+map("n", "<C-h>", "<C-w>h", { desc = "Go to left window" })
+map("n", "<C-j>", "<C-w>j", { desc = "Go to lower window" })
+map("n", "<C-k>", "<C-w>k", { desc = "Go to upper window" })
+map("n", "<C-l>", "<C-w>l", { desc = "Go to right window" })
+
+-- snacks.nvim
+map("n", "<leader>ff", function() Snacks.picker.files() end, { desc = "Find files" })
+map("n", "<leader>fg", function() Snacks.picker.grep() end, { desc = "Live grep" })
+map("n", "<leader>fb", function() Snacks.picker.buffers() end, { desc = "Find buffers" })
+map("n", "<leader>fh", function() Snacks.picker.help() end, { desc = "Help tags" })
+map("n", "<leader>e", function() Snacks.explorer() end, { desc = "File explorer" })
+
+-- LSP
+map("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
+map("n", "gr", vim.lsp.buf.references, { desc = "Go to references" })
+map("n", "K", vim.lsp.buf.hover, { desc = "Hover documentation" })
+map("n", "<leader>rn", vim.lsp.buf.rename, { desc = "Rename symbol" })
+map("n", "<leader>ca", vim.lsp.buf.code_action, { desc = "Code action" })
+
+-- diagnostics
+map("n", "[d", vim.diagnostic.goto_prev, { desc = "Previous diagnostic" })
+map("n", "]d", vim.diagnostic.goto_next, { desc = "Next diagnostic" })
+map("n", "<leader>dd", vim.diagnostic.open_float, { desc = "Show diagnostic" })
+{{if or .HasRust .HasGo .HasPython .HasCCpp}}
+-- dap
+map("n", "<leader>db", function() require("dap").toggle_breakpoint() end, { desc = "Toggle breakpoint" })
+map("n", "<leader>dc", function() require("dap").continue() end, { desc = "Debug continue" })
+map("n", "<leader>di", function() require("dap").step_into() end, { desc = "Debug step into" })
+map("n", "<leader>do", function() require("dap").step_over() end, { desc = "Debug step over" })
+{{end}}

@@ -1,0 +1,14 @@
+return {
+  "stevearc/conform.nvim",
+  event = { "BufWritePre" },
+  cmd = { "ConformInfo" },
+  opts = {
+    formatters_by_ft = {
+{{range .Formatters}}      ["{{.Filetype}}"] = { {{range $i, $f := .Formatters}}{{if $i}}, {{end}}"{{$f}}"{{end}} },
+{{end}}    },
+    format_on_save = {
+      timeout_ms = 1000,
+      lsp_format = "fallback",
+    },
+  },
+}
