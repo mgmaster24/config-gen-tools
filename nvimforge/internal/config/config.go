@@ -33,11 +33,14 @@ type Config struct {
 }
 
 // Default returns the built-in defaults used when no config file exists and
-// no flags override a given field. Languages is intentionally empty — v1
-// makes no assumption about which languages a new user wants.
+// no flags override a given field. Languages starts at DefaultLanguages:
+// interactively those come pre-selected (and can be deselected), and
+// non-interactively they're what `--yes` installs when nothing else says
+// otherwise. The slice is copied so callers can freely overwrite
+// cfg.Languages without mutating the package-level default.
 func Default() Config {
 	return Config{
-		Languages:  nil,
+		Languages:  append([]Language(nil), DefaultLanguages...),
 		DeployPath: DefaultDeployPath,
 		Backup:     true,
 		ShowBanner: true,

@@ -73,6 +73,26 @@ func newInstallCmd() *cobra.Command {
 				return &ExitError{Code: 1}
 			}
 
+			// A missing BlocksTooling prereq doesn't stop generation — prereqs
+			// stay report-only — but it does mean the config we're about to
+			// write can't finish installing itself, so confirm first. Under
+			// --yes the warning RenderText already printed has to stand on its
+			// own.
+			if report.HasMissingBlocking() && !yes {
+				names := make([]string, 0, len(report.MissingBlocking()))
+				for _, res := range report.MissingBlocking() {
+					names = append(names, res.Check.Name)
+				}
+				proceed, err := ui.ConfirmContinueWithBlocking(names)
+				if err != nil {
+					return err
+				}
+				if !proceed {
+					fmt.Fprintln(out, "Aborted; nothing was written.")
+					return nil
+				}
+			}
+
 			if !skipNeovimInstall {
 				if err := ensureNeovim(cmd.Context(), out, dryRun); err != nil {
 					return err
@@ -181,9 +201,9 @@ func resolveInstallConfig(opts installConfigOptions) (cfg config.Config, saveNee
 			return config.Config{}, false, "", err
 		}
 	case len(opts.LangFlags) > 0 || opts.Yes:
-		if len(opts.LangFlags) == 0 {
-			return config.Config{}, false, "", fmt.Errorf("no languages specified and no config file found; pass --lang or run without --yes")
-		}
+		// With no config file and no --lang, --yes falls back to
+		// config.DefaultLanguages rather than erroring: the defaults are the
+		// answer a user would most likely have given at the prompt.
 		cfg = config.Default()
 	default:
 		cfg, err = opts.Prompt(config.Default())

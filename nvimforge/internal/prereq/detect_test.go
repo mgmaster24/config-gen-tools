@@ -113,3 +113,58 @@ func TestRun_PopulatesPackageManagers(t *testing.T) {
 		t.Errorf("PackageManagers = %v, want [brew]", report.PackageManagers)
 	}
 }
+
+func TestReport_MissingBlocking_CSharpWithoutDotnet(t *testing.T) {
+	// dotnet absent: C# is selected but mason can't install roslyn or
+	// csharpier, so the check must surface as blocking without becoming
+	// "required" (which would make nvimforge refuse to run at all).
+	f := runnertest.New().
+		WithPath("git", "/usr/bin/git").
+		WithPath("curl", "/usr/bin/curl").
+		WithPath("tar", "/usr/bin/tar")
+
+	report := Run(f, []config.Language{config.LangCSharp}, "linux")
+
+	blocking := report.MissingBlocking()
+	if len(blocking) != 1 {
+		t.Fatalf("got %d blocking results, want 1: %+v", len(blocking), blocking)
+	}
+	if blocking[0].Check.Name != "dotnet" {
+		t.Errorf("blocking check = %q, want %q", blocking[0].Check.Name, "dotnet")
+	}
+	if !report.HasMissingBlocking() {
+		t.Error("HasMissingBlocking() should be true when dotnet is absent")
+	}
+	if report.HasMissingRequired() {
+		t.Error("a blocking check must not also be required; nvimforge should still be able to generate")
+	}
+}
+
+func TestReport_MissingBlocking_EmptyWhenDotnetPresent(t *testing.T) {
+	f := runnertest.New().
+		WithPath("git", "/usr/bin/git").
+		WithPath("curl", "/usr/bin/curl").
+		WithPath("tar", "/usr/bin/tar").
+		WithPath("dotnet", "/usr/bin/dotnet")
+
+	report := Run(f, []config.Language{config.LangCSharp}, "linux")
+
+	if report.HasMissingBlocking() {
+		t.Errorf("HasMissingBlocking() should be false with dotnet present, got %+v", report.MissingBlocking())
+	}
+}
+
+func TestReport_MissingBlocking_UnselectedLanguageIsNotChecked(t *testing.T) {
+	// dotnet is absent, but C# wasn't selected, so nothing should block.
+	f := runnertest.New().
+		WithPath("git", "/usr/bin/git").
+		WithPath("curl", "/usr/bin/curl").
+		WithPath("tar", "/usr/bin/tar").
+		WithPath("go", "/usr/bin/go")
+
+	report := Run(f, []config.Language{config.LangGo}, "linux")
+
+	if report.HasMissingBlocking() {
+		t.Errorf("HasMissingBlocking() should be false when C# isn't selected, got %+v", report.MissingBlocking())
+	}
+}

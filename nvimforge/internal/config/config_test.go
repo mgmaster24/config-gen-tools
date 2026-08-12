@@ -9,8 +9,17 @@ import (
 
 func TestDefault(t *testing.T) {
 	c := Default()
-	if len(c.Languages) != 0 {
-		t.Errorf("Default().Languages should be empty, got %v", c.Languages)
+	if len(c.Languages) != len(DefaultLanguages) {
+		t.Errorf("Default().Languages = %v, want %v", c.Languages, DefaultLanguages)
+	}
+	if err := c.Validate(); err != nil {
+		t.Errorf("Default() should be valid on its own, got %v", err)
+	}
+	// The returned slice must not alias the package-level default, or one
+	// caller overwriting cfg.Languages would corrupt it for every other.
+	c.Languages[0] = "mutated"
+	if DefaultLanguages[0] == "mutated" {
+		t.Error("Default() aliased DefaultLanguages instead of copying it")
 	}
 	if c.DeployPath != DefaultDeployPath {
 		t.Errorf("Default().DeployPath = %q, want %q", c.DeployPath, DefaultDeployPath)

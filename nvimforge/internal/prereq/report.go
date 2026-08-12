@@ -37,6 +37,12 @@ func RenderText(w io.Writer, report Report) {
 	if report.HasMissingRequired() {
 		fmt.Fprintln(w, "\nnvimforge cannot continue until the required items above are installed.")
 	}
+
+	for _, res := range report.MissingBlocking() {
+		fmt.Fprintf(w,
+			"\nWarning: %s is missing, so mason cannot install the %s tooling.\nThe generated config will be written, but %s support will fail to install until %s is on your PATH.\n",
+			res.Check.Name, res.Check.Language.DisplayName(), res.Check.Language.DisplayName(), res.Check.Name)
+	}
 }
 
 // filterHints narrows hints down to the package managers actually detected

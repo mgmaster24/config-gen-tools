@@ -183,10 +183,11 @@ var LanguageChecks = map[config.Language][]Check{
 			// roslyn-language-server and csharpier as NuGet packages by
 			// running `dotnet tool`, so with no dotnet on PATH the generated
 			// config's C# support fails to install rather than degrading.
-			Name:        "dotnet",
-			Description: "the .NET SDK; mason installs roslyn-language-server and csharpier as dotnet tools, so both fail without it",
-			Severity:    SeverityRecommended,
-			Language:    config.LangCSharp, Binary: "dotnet",
+			Name:          "dotnet",
+			Description:   "the .NET SDK; mason installs roslyn-language-server and csharpier as dotnet tools, so both fail without it",
+			Severity:      SeverityRecommended,
+			BlocksTooling: true,
+			Language:      config.LangCSharp, Binary: "dotnet",
 			Hints: []InstallHint{
 				{PMBrew, "brew install --cask dotnet-sdk"},
 				{PMApt, "sudo apt install dotnet-sdk-10.0"},

@@ -2,6 +2,7 @@ package cli
 
 import (
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/mgmaster24/nvimforge/internal/config"
@@ -50,17 +51,23 @@ func TestResolveInstallConfig_ExistingFile_NoPrompt(t *testing.T) {
 	}
 }
 
-func TestResolveInstallConfig_YesWithoutLangFails(t *testing.T) {
+func TestResolveInstallConfig_YesWithoutLangUsesDefaults(t *testing.T) {
 	dir := t.TempDir()
 	nonexistent := filepath.Join(dir, "does-not-exist.toml")
 
-	_, _, _, err := resolveInstallConfig(installConfigOptions{
+	cfg, saveNeeded, _, err := resolveInstallConfig(installConfigOptions{
 		ConfigPath: nonexistent,
 		Yes:        true,
 		Prompt:     failIfPromptCalled(t),
 	})
-	if err == nil {
-		t.Fatal("expected an error when --yes is set with no --lang and no config file")
+	if err != nil {
+		t.Fatalf("--yes with no --lang and no config file should fall back to defaults, got %v", err)
+	}
+	if !reflect.DeepEqual(cfg.Languages, config.DefaultLanguages) {
+		t.Errorf("cfg.Languages = %v, want the defaults %v", cfg.Languages, config.DefaultLanguages)
+	}
+	if saveNeeded {
+		t.Error("a non-interactive run should not offer to save a config")
 	}
 }
 

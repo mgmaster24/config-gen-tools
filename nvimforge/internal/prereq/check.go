@@ -48,6 +48,13 @@ type Check struct {
 	// Detect, when set, overrides Binary-based lookup.
 	Detect DetectFunc
 	Hints  []InstallHint
+	// BlocksTooling marks a check whose absence means mason cannot install
+	// this language's tooling at all — as opposed to the usual case, where a
+	// missing toolchain only degrades the experience. nvimforge still
+	// generates a config either way (prereqs stay report-only), but
+	// `install` confirms first rather than silently writing a config that is
+	// guaranteed to fail on first launch.
+	BlocksTooling bool
 }
 
 func (c Check) detect(r runner.Runner) (found bool, versionInfo string) {

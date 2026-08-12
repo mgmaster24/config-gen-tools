@@ -35,6 +35,23 @@ func (r Report) HasMissingRequired() bool {
 	return false
 }
 
+// MissingBlocking returns every missing check marked BlocksTooling — the
+// languages whose mason tooling cannot install on this machine.
+func (r Report) MissingBlocking() []CheckResult {
+	var blocking []CheckResult
+	for _, res := range r.Results {
+		if !res.Found && res.Check.BlocksTooling {
+			blocking = append(blocking, res)
+		}
+	}
+	return blocking
+}
+
+// HasMissingBlocking reports whether any BlocksTooling check is missing.
+func (r Report) HasMissingBlocking() bool {
+	return len(r.MissingBlocking()) > 0
+}
+
 // Run performs every UniversalCheck plus the LanguageChecks for langs,
 // returning a Report. It is pure aside from the injected Runner: no
 // printing, no process exit, so it can be unit tested and reused by both

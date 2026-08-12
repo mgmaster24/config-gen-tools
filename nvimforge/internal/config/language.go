@@ -37,6 +37,19 @@ var AllLanguages = []Language{
 	LangDockerYAML,
 }
 
+// DefaultLanguages is the set enabled when a user hasn't chosen otherwise:
+// broad enough that a fresh install is immediately useful, while leaving the
+// languages with heavier or host-toolchain-dependent tooling (rust, c-cpp,
+// csharp, docker-yaml) opt-in. Interactively these come pre-selected and can
+// be deselected; see Default().
+var DefaultLanguages = []Language{
+	LangGo,
+	LangPython,
+	LangTypeScript,
+	LangLua,
+	LangBash,
+}
+
 var languageDisplayNames = map[Language]string{
 	LangRust:       "Rust",
 	LangGo:         "Go",

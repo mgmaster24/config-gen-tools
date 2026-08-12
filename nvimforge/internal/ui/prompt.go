@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/charmbracelet/huh"
 
@@ -60,6 +61,27 @@ func PromptConfig(defaults config.Config) (config.Config, error) {
 }
 
 // ConfirmSave asks whether to save cfg to path, defaulting to yes.
+// ConfirmContinueWithBlocking asks whether to generate a config anyway when
+// a prerequisite is missing that will stop mason installing some language's
+// tooling. tools names the missing prerequisites (e.g. "dotnet"). It
+// defaults to false: silently writing a config that can't finish installing
+// is the outcome worth an extra keystroke to avoid.
+func ConfirmContinueWithBlocking(tools []string) (bool, error) {
+	proceed := false
+	err := huh.NewForm(
+		huh.NewGroup(
+			huh.NewConfirm().
+				Title(fmt.Sprintf("Missing %s. Generate the config anyway?", strings.Join(tools, ", "))).
+				Description("The affected language's tooling won't install until it's on your PATH.").
+				Value(&proceed),
+		),
+	).Run()
+	if err != nil {
+		return false, fmt.Errorf("prompt: %w", err)
+	}
+	return proceed, nil
+}
+
 func ConfirmSave(path string) (bool, error) {
 	save := true
 	err := huh.NewForm(
