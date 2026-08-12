@@ -207,7 +207,11 @@ func TestResolveInstallConfig_PromptReturningNoLanguages_FailsValidate(t *testin
 	_, _, _, err := resolveInstallConfig(installConfigOptions{
 		ConfigPath: nonexistent,
 		Prompt: func(defaults config.Config) (config.Config, error) {
-			return defaults, nil // no languages selected
+			// The user deselected every pre-checked default. Stated
+			// explicitly rather than just returning defaults, which are no
+			// longer empty.
+			defaults.Languages = nil
+			return defaults, nil
 		},
 	})
 	if err == nil {

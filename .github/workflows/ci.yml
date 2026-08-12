@@ -61,6 +61,42 @@ jobs:
             echo "no scripts/ci-smoke.sh for ${{ matrix.tool }}; skipping"
           fi
 
+  # Tier 1 integration: generate a config and prove Neovim can parse it.
+  # Offline and fast (~1s), so it belongs on the PR gate. Tiers that resolve
+  # plugins or install mason tooling are network-bound and flaky by nature —
+  # those belong on a schedule, not here.
+  integration:
+    needs: discover
+    strategy:
+      fail-fast: false
+      matrix:
+        tool: ${{ fromJSON(needs.discover.outputs.tools) }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ matrix.tool }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ matrix.tool }}/go.mod
+          cache-dependency-path: ${{ matrix.tool }}/go.sum
+      - name: Install Neovim
+        working-directory: ${{ runner.temp }}
+        run: |
+          curl -fsSL -o nvim.tar.gz \
+            https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+          tar xzf nvim.tar.gz
+          echo "$PWD/nvim-linux-x86_64/bin" >> "$GITHUB_PATH"
+      - name: Integration tests
+        run: |
+          if [ -d internal/integration ]; then
+            nvim --version | head -1
+            go test -tags integration ./internal/integration/...
+          else
+            echo "no internal/integration for ${{ matrix.tool }}; skipping"
+          fi
+
   lint:
     needs: discover
     strategy:
