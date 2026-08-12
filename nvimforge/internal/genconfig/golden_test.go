@@ -21,6 +21,7 @@ func TestRender_Golden(t *testing.T) {
 		"none":          nil,
 		"go-only":       {config.LangGo},
 		"rust-and-ccpp": {config.LangRust, config.LangCCpp}, // exercises codelldb dedup
+		"csharp-only":   {config.LangCSharp},                // only language whose DAP adapter is unshared
 		"all-languages": config.AllLanguages,
 	}
 

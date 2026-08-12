@@ -4,7 +4,11 @@
 # binary — all of nvimforge's actual logic lives in the Go binary itself.
 $ErrorActionPreference = "Stop"
 
-$Repo = "mgmaster24/nvimforge"
+$Repo = "mgmaster24/config-gen-tools"
+# config-gen-tools holds several tools, each released under its own
+# tool-scoped tag (e.g. nvimforge/v1.2.3), so releases must be filtered by
+# this prefix rather than taking the repo's newest release.
+$Tool = "nvimforge"
 $InstallDir = if ($env:NVIMFORGE_INSTALL_DIR) { $env:NVIMFORGE_INSTALL_DIR } else { "$env:LOCALAPPDATA\nvimforge\bin" }
 $Version = $env:NVIMFORGE_VERSION
 
@@ -17,15 +21,20 @@ if (-not [Environment]::Is64BitOperatingSystem) {
 $Arch = "amd64"
 
 if (-not $Version) {
-    Write-Info "Resolving latest nvimforge release..."
-    $release = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases/latest"
-    $Version = $release.tag_name
-    if (-not $Version) { Write-ErrAndExit "could not resolve the latest release version" }
+    Write-Info "Resolving latest $Tool release..."
+    # /releases/latest would return whichever tool released most recently, so
+    # list releases (newest first) and take the first tagged for this tool.
+    $releases = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases?per_page=100"
+    $Version = ($releases | Where-Object { $_.tag_name -like "$Tool/*" } | Select-Object -First 1).tag_name
+    if (-not $Version) { Write-ErrAndExit "could not resolve the latest $Tool release" }
 }
 
+# Accept either a bare version (v1.2.3) or a fully-qualified tag
+# (nvimforge/v1.2.3) in $env:NVIMFORGE_VERSION.
+if ($Version.StartsWith("$Tool/")) { $Version = $Version.Substring("$Tool/".Length) }
 $VersionNum = $Version.TrimStart("v")
 $Archive = "nvimforge_${VersionNum}_windows_${Arch}.zip"
-$BaseUrl = "https://github.com/$Repo/releases/download/$Version"
+$BaseUrl = "https://github.com/$Repo/releases/download/$Tool/$Version"
 
 $WorkDir = Join-Path $env:TEMP ([System.Guid]::NewGuid())
 New-Item -ItemType Directory -Path $WorkDir | Out-Null

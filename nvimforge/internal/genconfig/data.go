@@ -28,6 +28,7 @@ type TemplateData struct {
 	HasTypeScript bool
 	HasLua        bool
 	HasCCpp       bool
+	HasCSharp     bool
 	HasBash       bool
 	HasDockerYAML bool
 
@@ -63,6 +64,8 @@ func BuildTemplateData(cfg config.Config) TemplateData {
 			data.HasLua = true
 		case config.LangCCpp:
 			data.HasCCpp = true
+		case config.LangCSharp:
+			data.HasCSharp = true
 		case config.LangBash:
 			data.HasBash = true
 		case config.LangDockerYAML:

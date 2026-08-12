@@ -20,7 +20,7 @@ func TestBuildTemplateData_NoLanguages_OnlyBaseline(t *testing.T) {
 	if len(data.Formatters) != 0 {
 		t.Errorf("Formatters should be empty with no languages, got %v", data.Formatters)
 	}
-	if data.HasRust || data.HasGo || data.HasPython || data.HasTypeScript || data.HasLua || data.HasCCpp || data.HasBash || data.HasDockerYAML {
+	if data.HasRust || data.HasGo || data.HasPython || data.HasTypeScript || data.HasLua || data.HasCCpp || data.HasCSharp || data.HasBash || data.HasDockerYAML {
 		t.Error("no Has* flag should be true with no languages selected")
 	}
 }

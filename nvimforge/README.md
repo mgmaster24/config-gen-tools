@@ -10,13 +10,13 @@ existing distribution.
 macOS / Linux:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/mgmaster24/nvimforge/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/mgmaster24/config-gen-tools/main/nvimforge/install.sh | sh
 ```
 
 Windows (PowerShell):
 
 ```powershell
-irm https://raw.githubusercontent.com/mgmaster24/nvimforge/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/mgmaster24/config-gen-tools/main/nvimforge/install.ps1 | iex
 ```
 
 Either script only downloads and places the `nvimforge` binary for your
@@ -40,7 +40,8 @@ nvimforge install --lang go --lang rust --lang python --yes
 
 ### Supported languages
 
-`rust`, `go`, `python`, `typescript`, `lua`, `c-cpp`, `bash`, `docker-yaml`.
+`rust`, `go`, `python`, `typescript`, `lua`, `c-cpp`, `csharp`, `bash`,
+`docker-yaml`.
 Each is independently selectable; only the LSP servers, treesitter
 parsers, formatters, and (where applicable) debug adapters for the
 languages you pick get wired into the generated config. LSP/formatter/DAP

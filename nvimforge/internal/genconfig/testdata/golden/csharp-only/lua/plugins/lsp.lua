@@ -15,43 +15,15 @@ return {
     dependencies = { "williamboman/mason.nvim" },
     opts = {
       ensure_installed = {
-        "bash-language-server",
-        "clang-format",
-        "clangd",
-        "codelldb",
         "csharpier",
-        "debugpy",
-        "delve",
-        "dockerfile-language-server",
-        "goimports",
-        "gopls",
-        "lua-language-server",
         "netcoredbg",
-        "prettierd",
-        "pyright",
         "roslyn-language-server",
-        "ruff",
-        "rust-analyzer",
-        "rustfmt",
-        "shfmt",
-        "stylua",
-        "typescript-language-server",
-        "yaml-language-server",
-        "yamlfmt",
       },
     },
   },
   {
     "neovim/nvim-lspconfig",
     config = function()
-      vim.lsp.config("lua_ls", {
-        settings = {
-          Lua = {
-            diagnostics = { globals = { "vim" } },
-            workspace = { checkThirdParty = false },
-          },
-        },
-      })
 
       vim.api.nvim_create_autocmd("LspAttach", {
         callback = function(args)

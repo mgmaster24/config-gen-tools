@@ -18,6 +18,7 @@ const (
 	LangTypeScript Language = "typescript"
 	LangLua        Language = "lua"
 	LangCCpp       Language = "c-cpp"
+	LangCSharp     Language = "csharp"
 	LangBash       Language = "bash"
 	LangDockerYAML Language = "docker-yaml"
 )
@@ -31,6 +32,7 @@ var AllLanguages = []Language{
 	LangTypeScript,
 	LangLua,
 	LangCCpp,
+	LangCSharp,
 	LangBash,
 	LangDockerYAML,
 }
@@ -42,6 +44,7 @@ var languageDisplayNames = map[Language]string{
 	LangTypeScript: "TypeScript",
 	LangLua:        "Lua",
 	LangCCpp:       "C/C++",
+	LangCSharp:     "C#",
 	LangBash:       "Bash",
 	LangDockerYAML: "Docker/YAML",
 }

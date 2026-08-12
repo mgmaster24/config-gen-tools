@@ -7,6 +7,7 @@ return {
       ["bash"] = { "shfmt" },
       ["c"] = { "clang-format" },
       ["cpp"] = { "clang-format" },
+      ["cs"] = { "csharpier" },
       ["go"] = { "goimports" },
       ["javascript"] = { "prettierd" },
       ["javascriptreact"] = { "prettierd" },

@@ -1,4 +1,4 @@
-{{if or .HasRust .HasGo .HasPython .HasCCpp}}
+{{if or .HasRust .HasGo .HasPython .HasCCpp .HasCSharp}}
 return {
   "mfussenegger/nvim-dap",
   dependencies = { "rcarriga/nvim-dap-ui", "nvim-neotest/nvim-nio" },
@@ -51,6 +51,30 @@ return {
     }
     dap.configurations.python = {
       { type = "python", request = "launch", name = "Launch file", program = "${file}" },
+    }
+{{end}}
+{{if .HasCSharp}}
+    dap.adapters.coreclr = {
+      type = "executable",
+      command = vim.fn.stdpath("data") .. "/mason/bin/netcoredbg",
+      args = { "--interpreter=vscode" },
+    }
+    dap.configurations.cs = {
+      {
+        type = "coreclr",
+        name = "Launch",
+        request = "launch",
+        justMyCode = false,
+        program = function()
+          -- Debug output lands in bin/Debug/<tfm>/<Project>.dll, which is
+          -- tedious to type: offer the first match as the default.
+          local root = vim.fs.root(0, function(name)
+            return name:match("%.csproj$") ~= nil
+          end) or vim.fn.getcwd()
+          local dlls = vim.fn.glob(root .. "/bin/Debug/*/*.dll", true, true)
+          return vim.fn.input("Path to dll: ", dlls[1] or (root .. "/bin/Debug/"), "file")
+        end,
+      },
     }
 {{end}}
     dapui.setup()

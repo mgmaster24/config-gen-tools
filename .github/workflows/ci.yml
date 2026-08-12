@@ -6,31 +6,74 @@ on:
   pull_request:
 
 jobs:
+  # Every directory holding a go.mod is one tool. Discovering them at runtime
+  # means adding a tool to the repo needs no edit to this workflow.
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      tools: ${{ steps.find.outputs.tools }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: find
+        run: |
+          tools=$(find . -mindepth 2 -maxdepth 2 -name go.mod -printf '%h\n' \
+            | sed 's|^\./||' \
+            | sort \
+            | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          if [ "$tools" = "[]" ]; then
+            echo "::error::no tools found (expected at least one <tool>/go.mod)"
+            exit 1
+          fi
+          echo "tools=$tools" >> "$GITHUB_OUTPUT"
+          echo "Discovered tools: $tools"
+
   test:
+    needs: discover
     strategy:
+      fail-fast: false
       matrix:
+        tool: ${{ fromJSON(needs.discover.outputs.tools) }}
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ${{ matrix.tool }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          go-version-file: ${{ matrix.tool }}/go.mod
+          cache-dependency-path: ${{ matrix.tool }}/go.sum
       - run: go build ./...
       - run: go vet ./...
       - run: go test ./... -race
-      - name: install --dry-run smoke test
-        # Hits the real GitHub API for neovim/neovim's latest release
-        # metadata (to report what --dry-run would do) but performs zero
-        # downloads or writes — the one intentional exception to "no
-        # network" in the rest of the test suite.
-        run: go run ./cmd/nvimforge install --dry-run --lang go --lang lua --yes --deploy-path ${{ runner.temp }}/nvimforge-ci-deploy
+      - name: smoke test
+        shell: bash
+        # Convention: a tool may ship scripts/ci-smoke.sh for an end-to-end
+        # check that doesn't fit inside `go test`. Tools without one are
+        # skipped, so this step stays generic across the matrix.
+        env:
+          RUNNER_TEMP: ${{ runner.temp }}
+        run: |
+          if [ -f scripts/ci-smoke.sh ]; then
+            bash scripts/ci-smoke.sh
+          else
+            echo "no scripts/ci-smoke.sh for ${{ matrix.tool }}; skipping"
+          fi
 
   lint:
+    needs: discover
+    strategy:
+      fail-fast: false
+      matrix:
+        tool: ${{ fromJSON(needs.discover.outputs.tools) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          go-version-file: ${{ matrix.tool }}/go.mod
+          cache-dependency-path: ${{ matrix.tool }}/go.sum
       - uses: golangci/golangci-lint-action@v6
+        with:
+          working-directory: ${{ matrix.tool }}

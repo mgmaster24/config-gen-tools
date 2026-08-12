@@ -5,7 +5,11 @@
 # binary itself. For Windows, use install.ps1 instead.
 set -euo pipefail
 
-REPO="mgmaster24/nvimforge"
+REPO="mgmaster24/config-gen-tools"
+# config-gen-tools holds several tools, each released under its own
+# tool-scoped tag (e.g. nvimforge/v1.2.3), so releases must be filtered by
+# this prefix rather than taking the repo's newest release.
+TOOL="nvimforge"
 INSTALL_DIR="${NVIMFORGE_INSTALL_DIR:-$HOME/.local/bin}"
 VERSION="${NVIMFORGE_VERSION:-}"
 
@@ -35,15 +39,24 @@ OS="$(detect_os)"
 ARCH="$(detect_arch)"
 
 if [ -z "$VERSION" ]; then
-  info "Resolving latest nvimforge release..."
-  VERSION="$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" |
-    grep -m1 '"tag_name"' | sed -E 's/.*"tag_name": *"([^"]+)".*/\1/')"
-  [ -n "$VERSION" ] || err "could not resolve the latest release version"
+  info "Resolving latest ${TOOL} release..."
+  # /releases/latest would return whichever tool released most recently, so
+  # list releases (newest first) and take the first one tagged for this tool.
+  VERSION="$(curl -fsSL "https://api.github.com/repos/${REPO}/releases?per_page=100" |
+    grep '"tag_name":' |
+    sed -E 's/.*"tag_name": *"([^"]+)".*/\1/' |
+    grep "^${TOOL}/" |
+    head -n1 |
+    sed "s|^${TOOL}/||")"
+  [ -n "$VERSION" ] || err "could not resolve the latest ${TOOL} release"
 fi
 
+# Accept either a bare version (v1.2.3) or a fully-qualified tag
+# (nvimforge/v1.2.3) in NVIMFORGE_VERSION.
+VERSION="${VERSION#"${TOOL}/"}"
 VERSION_NUM="${VERSION#v}"
 ARCHIVE="nvimforge_${VERSION_NUM}_${OS}_${ARCH}.tar.gz"
-BASE_URL="https://github.com/${REPO}/releases/download/${VERSION}"
+BASE_URL="https://github.com/${REPO}/releases/download/${TOOL}/${VERSION}"
 
 WORKDIR="$(mktemp -d)"
 trap 'rm -rf "$WORKDIR"' EXIT

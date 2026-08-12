@@ -69,6 +69,17 @@ var LanguageSpecs = map[config.Language]LanguageSpec{
 		Formatters:        []FormatterSpec{{MasonName: "clang-format", Filetypes: []string{"c", "cpp"}}},
 		DAPAdapters:       []string{"codelldb"},
 	},
+	config.LangCSharp: {
+		// The parser is "c_sharp" (underscore) while the filetype is "cs" —
+		// the one language here where the two names don't line up.
+		TreesitterParsers: []string{"c_sharp"},
+		// Both of these are NuGet packages: mason installs them by shelling
+		// out to `dotnet tool`, which is why LangCSharp's prereq check on the
+		// .NET SDK matters more than the other languages' toolchain checks.
+		LSPServers:  []string{"roslyn-language-server"},
+		Formatters:  []FormatterSpec{{MasonName: "csharpier", Filetypes: []string{"cs"}}},
+		DAPAdapters: []string{"netcoredbg"},
+	},
 	config.LangBash: {
 		TreesitterParsers: []string{"bash"},
 		LSPServers:        []string{"bash-language-server"},
