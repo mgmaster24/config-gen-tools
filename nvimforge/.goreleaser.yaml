@@ -51,6 +51,22 @@ changelog:
       - "^test:"
       - "^ci:"
 
-# Homebrew tap / Scoop bucket manifests can be added here once a
-# homebrew-tap / scoop-bucket repo exists — intentionally deferred, not a
-# v1 blocker (see brews:/scoops: in goreleaser docs).
+# No package-manager manifests (Homebrew/Scoop/winget). install.sh and
+# install.ps1 already fetch the right platform archive, verify its checksum,
+# and place the binary without sudo, so a tap would mostly duplicate them.
+#
+# If that changes, note two things this repo's tagging scheme forces:
+#
+#  1. The manifests DO get rendered under `--skip=publish` (into
+#     dist/homebrew/, dist/scoop/ etc.) — only the upload to the tap/bucket
+#     repo is skipped. So publishing means committing those files to the tap
+#     repo in a follow-on workflow step, not un-skipping publish.
+#  2. Their download URLs will be WRONG by default. GoReleaser sees the bare
+#     GORELEASER_CURRENT_TAG (v1.2.3) and renders
+#     .../releases/download/v1.2.3/..., but the real tag is
+#     nvimforge/v1.2.3. An explicit url_template re-adding the tool prefix
+#     is required.
+#
+# Also: `brews:` is deprecated (v2.10, enforced v2.16) in favour of
+# `homebrew_casks:`, and casks are macOS-only — migrating would drop the
+# Linuxbrew support the old formula had.
