@@ -3,6 +3,7 @@ package fsutil
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 )
 
@@ -22,12 +23,18 @@ func TestAtomicWriteFile_CreatesFileWithContentAndPerm(t *testing.T) {
 		t.Errorf("content = %q, want %q", got, "hello")
 	}
 
-	info, err := os.Stat(path)
-	if err != nil {
-		t.Fatalf("Stat: %v", err)
-	}
-	if perm := info.Mode().Perm(); perm != 0o644 {
-		t.Errorf("perm = %v, want %v", perm, os.FileMode(0o644))
+	// Windows has no Unix permission bits: os.Stat reports 0666 for any
+	// writable file and 0444 for a read-only one, so 0644 is unrepresentable
+	// and this assertion can never hold there. The content and atomicity
+	// guarantees above still apply on every platform.
+	if runtime.GOOS != "windows" {
+		info, err := os.Stat(path)
+		if err != nil {
+			t.Fatalf("Stat: %v", err)
+		}
+		if perm := info.Mode().Perm(); perm != 0o644 {
+			t.Errorf("perm = %v, want %v", perm, os.FileMode(0o644))
+		}
 	}
 }
 

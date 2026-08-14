@@ -110,6 +110,14 @@ jobs:
         with:
           go-version-file: ${{ matrix.tool }}/go.mod
           cache-dependency-path: ${{ matrix.tool }}/go.sum
-      - uses: golangci/golangci-lint-action@v6
+      # v6 installs golangci-lint 1.x, which is built with go1.24 and refuses
+      # to run against a module targeting a newer language version. v9 tracks
+      # golangci-lint 2.x.
+      - uses: golangci/golangci-lint-action@v9
         with:
           working-directory: ${{ matrix.tool }}
+          # Pinned rather than floating: the previous failure was exactly a
+          # golangci-lint/Go version mismatch, and an implicit version means
+          # the next upstream release can reintroduce it without a commit
+          # here. v2.12.2 is built with go1.26.2. Bump deliberately.
+          version: v2.12.2
