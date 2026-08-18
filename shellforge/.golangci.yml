@@ -1,0 +1,15 @@
+version: "2"
+
+linters:
+  exclusions:
+    # golangci-lint v1 applied a set of default exclusions; v2 removed them,
+    # which is why upgrading surfaced ~25 errcheck findings at once. This
+    # restores the standard one rather than annotating each call site.
+    #
+    # std-error-handling covers the cases those findings fell into: unchecked
+    # fmt.Fprint* to an io.Writer, deferred Close() for cleanup, and os.Remove
+    # of a temp file. Real error handling on the success path is still checked
+    # — internal/fsutil/atomicwrite.go, for instance, checks the Close() whose
+    # failure would actually mean data loss.
+    presets:
+      - std-error-handling
