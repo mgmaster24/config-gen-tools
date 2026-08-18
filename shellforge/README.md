@@ -15,6 +15,36 @@ and break quietly when a hand-edited rc file drifts:
 shellforge assigns each integration a phase and sorts by it. Selection order
 is discarded — placement is the generator's decision, not yours.
 
+## Installation
+
+macOS / Linux:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/mgmaster24/config-gen-tools/main/shellforge/install.sh | sh
+```
+
+Windows (PowerShell):
+
+```powershell
+irm https://raw.githubusercontent.com/mgmaster24/config-gen-tools/main/shellforge/install.ps1 | iex
+```
+
+The script downloads, checksum-verifies, and places the `shellforge` binary
+for your platform — no admin/sudo required. It resolves releases tagged
+`shellforge/vX.Y.Z`, so nvimforge or gitforge releasing more recently never
+shadows it.
+
+| Variable | Effect | Default |
+|----------|--------|---------|
+| `SHELLFORGE_VERSION` | Pin a release. Accepts `v1.2.3` or `shellforge/v1.2.3`. | latest |
+| `SHELLFORGE_INSTALL_DIR` | Where to place the binary. | `~/.local/bin` (Unix), `%LOCALAPPDATA%\shellforge\bin` (Windows) |
+
+From source:
+
+```sh
+go install github.com/mgmaster24/config-gen-tools/shellforge/cmd/shellforge@latest
+```
+
 ## Usage
 
 ```sh

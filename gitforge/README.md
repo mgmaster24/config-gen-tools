@@ -15,6 +15,35 @@ wrong. There's an integration test asserting that real git genuinely does
 *not* match subdirectories without it, so the rule stays honest if git ever
 changes.
 
+## Installation
+
+macOS / Linux:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/mgmaster24/config-gen-tools/main/gitforge/install.sh | sh
+```
+
+Windows (PowerShell):
+
+```powershell
+irm https://raw.githubusercontent.com/mgmaster24/config-gen-tools/main/gitforge/install.ps1 | iex
+```
+
+The script downloads, checksum-verifies, and places the `gitforge` binary for
+your platform — no admin/sudo required. It resolves releases tagged
+`gitforge/vX.Y.Z`, so another tool releasing more recently never shadows it.
+
+| Variable | Effect | Default |
+|----------|--------|---------|
+| `GITFORGE_VERSION` | Pin a release. Accepts `v1.2.3` or `gitforge/v1.2.3`. | latest |
+| `GITFORGE_INSTALL_DIR` | Where to place the binary. | `~/.local/bin` (Unix), `%LOCALAPPDATA%\gitforge\bin` (Windows) |
+
+From source:
+
+```sh
+go install github.com/mgmaster24/config-gen-tools/gitforge/cmd/gitforge@latest
+```
+
 ## Usage
 
 ```sh

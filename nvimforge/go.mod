@@ -39,10 +39,4 @@ require (
 	golang.org/x/text v0.23.0 // indirect
 )
 
-require github.com/mgmaster24/config-gen-tools/forge v0.0.0
-
-// forge has no published tag yet. Until `forge/v0.1.0` is tagged and pushed,
-// this replace is what lets the tool modules resolve it. Swap it for a real
-// version at that point — a local replace makes `go install` of this module
-// fail for anyone outside the repo.
-replace github.com/mgmaster24/config-gen-tools/forge => ../forge
+require github.com/mgmaster24/config-gen-tools/forge v0.1.0
