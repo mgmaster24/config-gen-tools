@@ -25,20 +25,37 @@ jobs:
           tag="${GITHUB_REF_NAME}"
           tool="${tag%/*}"
           version="${tag##*/}"
-          if [ ! -f "$tool/.goreleaser.yaml" ]; then
-            echo "::error::tag '$tag' names tool '$tool', but $tool/.goreleaser.yaml does not exist"
+
+          # A missing directory means the tag names something that doesn't
+          # exist — almost certainly a typo, and worth failing loudly.
+          if [ ! -d "$tool" ]; then
+            echo "::error::tag '$tag' names '$tool', but no such directory exists"
             exit 1
           fi
+
+          # A module with no .goreleaser.yaml is a library (forge), not a
+          # CLI. Tagging one is legitimate — Go resolves library versions
+          # from exactly these tags — so skip cleanly rather than failing
+          # the run and leaving a red X on a correct action.
+          if [ ! -f "$tool/.goreleaser.yaml" ]; then
+            echo "::notice::$tool is a library module (no .goreleaser.yaml); nothing to release for $tag"
+            echo "releasable=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "releasable=true" >> "$GITHUB_OUTPUT"
           echo "tool=$tool" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "Releasing $tool $version"
 
       - uses: actions/setup-go@v5
+        if: steps.tag.outputs.releasable == 'true'
         with:
           go-version-file: ${{ steps.tag.outputs.tool }}/go.mod
           cache-dependency-path: ${{ steps.tag.outputs.tool }}/go.sum
 
       - uses: goreleaser/goreleaser-action@v6
+        if: steps.tag.outputs.releasable == 'true'
         with:
           distribution: goreleaser
           version: latest
@@ -55,6 +72,7 @@ jobs:
           GORELEASER_CURRENT_TAG: ${{ steps.tag.outputs.version }}
 
       - name: Publish GitHub release
+        if: steps.tag.outputs.releasable == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TOOL: ${{ steps.tag.outputs.tool }}
