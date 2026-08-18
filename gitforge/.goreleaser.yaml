@@ -1,0 +1,70 @@
+version: 2
+project_name: gitforge
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: gitforge
+    main: ./cmd/gitforge
+    binary: gitforge
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X github.com/mgmaster24/config-gen-tools/gitforge/internal/cli.Version={{.Version}}
+
+archives:
+  - id: gitforge
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: "checksums.txt"
+
+# No `release:` block: the GitHub release for a tool-scoped tag
+# (gitforge/v1.2.3) is created by .github/workflows/release.yml, which runs
+# goreleaser with --skip=publish. An explicit release target here previously
+# pointed at mgmaster24/gitforge, which does not exist.
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+
+# No package-manager manifests (Homebrew/Scoop/winget). install.sh and
+# install.ps1 already fetch the right platform archive, verify its checksum,
+# and place the binary without sudo, so a tap would mostly duplicate them.
+#
+# If that changes, note two things this repo's tagging scheme forces:
+#
+#  1. The manifests DO get rendered under `--skip=publish` (into
+#     dist/homebrew/, dist/scoop/ etc.) — only the upload to the tap/bucket
+#     repo is skipped. So publishing means committing those files to the tap
+#     repo in a follow-on workflow step, not un-skipping publish.
+#  2. Their download URLs will be WRONG by default. GoReleaser sees the bare
+#     GORELEASER_CURRENT_TAG (v1.2.3) and renders
+#     .../releases/download/v1.2.3/..., but the real tag is
+#     gitforge/v1.2.3. An explicit url_template re-adding the tool prefix
+#     is required.
+#
+# Also: `brews:` is deprecated (v2.10, enforced v2.16) in favour of
+# `homebrew_casks:`, and casks are macOS-only — migrating would drop the
+# Linuxbrew support the old formula had.
