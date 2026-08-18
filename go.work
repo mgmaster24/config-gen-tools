@@ -1,0 +1,11 @@
+// Local development workspace. CI and `go install` resolve the shared forge
+// module by version instead; this just lets edits across modules build
+// together without replace directives in each go.mod.
+go 1.26.5
+
+use (
+	./gitforge
+	./shellforge
+	./forge
+	./nvimforge
+)

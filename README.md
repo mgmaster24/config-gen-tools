@@ -2,68 +2,119 @@
 
 A monorepo of configuration-generation tools. Each tool is a self-contained
 Go module in its own top-level directory, built, tested, and released
-independently.
+independently, on top of a shared `forge` core.
 
 ## Tools
 
 | Tool | Description |
 |------|-------------|
 | [nvimforge](./nvimforge) | Installs Neovim and generates a minimal, language-aware `lazy.nvim` configuration. |
+| [shellforge](./shellforge) | Generates a zsh/bash init script with tool hooks emitted in dependency order. |
+| [gitforge](./gitforge) | Generates an includable gitconfig with directory-scoped identities. |
+| [forge](./forge) | Shared library: filesystem helpers, prerequisite detection, command runner. Not a CLI. |
+
+Each generator follows the same contract: it **never edits a file you own**.
+It writes self-contained output under `~/.config/<tool>/` and prints the one
+line to include or source from your own rc file.
+
+## The shared core
+
+`forge` is where the second tool stopped being a copy-paste of the first:
+
+| Package | Provides |
+|---|---|
+| `forge/fsutil` | atomic writes, backup-if-not-ours, per-tool generated markers, `~` expansion |
+| `forge/prereq` | check/detect/report with package-manager-aware install hints |
+| `forge/runner` | the `os/exec` seam that makes detection unit-testable |
+
+`forge/prereq` knows nothing about languages, shells, or identities — each
+tool supplies its own check list via a `Scope` string, so the framework never
+grows a dependency on any one tool's domain types.
 
 ## Repository layout
 
 ```
+forge/                   # shared library module (no cmd/)
 <tool>/
   go.mod                 # one module per tool — this is what CI discovers
-  .goreleaser.yaml       # required; the release workflow keys off its presence
+  .goreleaser.yaml       # required to be releasable; the release workflow keys off it
+  .golangci.yml
   scripts/ci-smoke.sh    # optional end-to-end check run by CI
   cmd/<tool>/main.go
-  internal/...
+  internal/
+    config/              # the tool's own TOML config
+    gen*/                # templates + render/write, with golden tests
+    checks/              # prereq data on top of forge/prereq
+    integration/         # //go:build integration — validates generated output
 ```
+
+## Module paths and versioning
+
+Modules are named for their location in the repo:
+
+```
+github.com/mgmaster24/config-gen-tools/<tool>
+```
+
+This is required, not cosmetic. Go resolves a module in subdirectory `foo/`
+from the tag `foo/v1.2.3` — which is exactly the tool-scoped tagging the
+release workflow uses. It also means `go install` works:
+
+```sh
+go install github.com/mgmaster24/config-gen-tools/nvimforge/cmd/nvimforge@latest
+```
+
+> **Outstanding:** `forge` has no published tag yet, so each tool's `go.mod`
+> carries a `replace` pointing at `../forge`. That works for local development
+> and CI (via `go.work`), but a local `replace` makes `go install` fail for
+> anyone outside the repo. Tag and push `forge/v0.1.0`, then swap each
+> `replace` for a real version.
+
+`go.work` at the repo root is for local development only — it lets edits
+across modules build together without per-module `replace` directives.
 
 ## Adding a new tool
 
-1. Create `<tool>/` with its own `go.mod`.
-2. Add `<tool>/.goreleaser.yaml` — copy `nvimforge/.goreleaser.yaml` and
-   change `project_name`, `builds.main`, `builds.binary`, and the
-   `buildinfo` ldflags paths.
-3. Optionally add `<tool>/scripts/ci-smoke.sh` for an end-to-end check that
-   doesn't fit inside `go test`.
+1. Create `<tool>/` with `go.mod` declaring
+   `github.com/mgmaster24/config-gen-tools/<tool>`.
+2. Add `.goreleaser.yaml` and `.golangci.yml` (copy an existing pair).
+3. Add `<tool>` to `go.work`.
+4. Optionally add `scripts/ci-smoke.sh` and `internal/integration`.
 
-No CI changes are needed. The `discover` job in `.github/workflows/ci.yml`
-finds every directory containing a `go.mod` and fans the build, vet, test,
-smoke, and lint jobs out over them.
+No CI changes needed — `discover` finds every directory containing a
+`go.mod` and fans the jobs out over it.
 
 ## CI
 
-`.github/workflows/ci.yml` runs on every push to `main` and every pull
-request:
+`.github/workflows/ci.yml` runs on every push to `main` and every PR:
 
-- **discover** — emits the list of tool directories as a JSON matrix.
+- **discover** — emits the tool directories as a JSON matrix.
 - **test** — `go build`, `go vet`, `go test -race`, then `scripts/ci-smoke.sh`
-  if present, across Linux, macOS, and Windows for each tool.
-- **lint** — `golangci-lint` per tool.
+  if present, across Linux, macOS, and Windows.
+- **integration** — tier-1 checks that generated output is *valid*: Neovim
+  parses the Lua, the shell parses the script, git parses the gitconfig.
+  Offline and fast, so it belongs on the PR gate.
+- **lint** — `golangci-lint` per module, pinned to a version built with a Go
+  release at least as new as the modules target.
 
 ## Releasing
 
-Releases are per tool, using **tool-scoped tags**:
+Per tool, using tool-scoped tags:
 
 ```sh
 git tag nvimforge/v1.2.3
 git push origin nvimforge/v1.2.3
 ```
 
-`.github/workflows/release.yml` parses the tool name and version out of the
-tag, runs GoReleaser inside that tool's directory to cross-compile and
-archive, then publishes a GitHub release attached to the full prefixed tag.
+`.github/workflows/release.yml` parses the tool and version out of the tag,
+runs GoReleaser in that tool's directory to cross-compile and archive, then
+publishes a GitHub release attached to the full prefixed tag. Two tools can
+both sit at `v1.2.3` without colliding, and releasing one never implies
+releasing the others.
 
-Two tools can therefore both be at `v1.2.3` without colliding, and releasing
-one never implies a release of the others.
-
-> GoReleaser's native monorepo support (`monorepo.tag_prefix`) is a
-> GoReleaser Pro feature. This repo uses OSS GoReleaser, so the workflow runs
+> GoReleaser's native monorepo support (`monorepo.tag_prefix`) is Pro-only.
+> This repo uses OSS GoReleaser, so the workflow runs
 > `release --clean --skip=publish,validate` to build and archive, and creates
-> the GitHub release with `gh release create` against the prefixed tag. That
-> split is deliberate: letting GoReleaser publish would require handing it the
-> bare `v1.2.3`, which would create an unprefixed tag shared across every tool
-> in the repo.
+> the release with `gh release create` against the prefixed tag. Letting
+> GoReleaser publish would require handing it the bare `v1.2.3`, which would
+> create an unprefixed tag shared across every tool in the repo.

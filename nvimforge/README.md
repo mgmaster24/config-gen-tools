@@ -35,7 +35,7 @@ Both accept two environment variables:
 ### From source
 
 ```sh
-go install github.com/mgmaster24/nvimforge/cmd/nvimforge@latest
+go install github.com/mgmaster24/config-gen-tools/nvimforge/cmd/nvimforge@latest
 ```
 
 This builds without release ldflags, so `nvimforge version` will report
