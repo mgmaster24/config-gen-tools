@@ -1,4 +1,4 @@
-// Package runner abstracts the small slice of os/exec that nvimforge needs
+// Package runner abstracts the small slice of os/exec that forge tools need
 // (probing PATH, running a command for its output) behind an interface, so
 // prereq detection and the Neovim installer can be unit tested against a
 // fake instead of the real system.

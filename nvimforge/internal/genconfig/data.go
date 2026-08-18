@@ -3,7 +3,7 @@ package genconfig
 import (
 	"sort"
 
-	"github.com/mgmaster24/nvimforge/internal/config"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/config"
 )
 
 // baselineTreesitterParsers install regardless of selected languages: they

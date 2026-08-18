@@ -64,7 +64,7 @@ func TestRenderText_MissingItemsShowFilteredHintsAndBlockMessage(t *testing.T) {
 	if strings.Contains(out, "brew install ripgrep") {
 		t.Error("brew hint should be filtered out: brew wasn't detected on this machine")
 	}
-	if !strings.Contains(out, "cannot continue") {
+	if !strings.Contains(out, "Cannot continue") {
 		t.Error("expected a blocking message since downloader (Required) is missing")
 	}
 }

@@ -8,13 +8,14 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/mgmaster24/nvimforge/internal/config"
-	"github.com/mgmaster24/nvimforge/internal/genconfig"
-	"github.com/mgmaster24/nvimforge/internal/github"
-	"github.com/mgmaster24/nvimforge/internal/neovim"
-	"github.com/mgmaster24/nvimforge/internal/prereq"
-	"github.com/mgmaster24/nvimforge/internal/runner"
-	"github.com/mgmaster24/nvimforge/internal/ui"
+	"github.com/mgmaster24/config-gen-tools/forge/prereq"
+	"github.com/mgmaster24/config-gen-tools/forge/runner"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/checks"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/config"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/genconfig"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/github"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/neovim"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/ui"
 )
 
 func newInstallCmd() *cobra.Command {
@@ -66,7 +67,7 @@ func newInstallCmd() *cobra.Command {
 
 			ui.PrintBanner(out, cfg.ShowBanner)
 
-			report := prereq.Run(runner.OSRunner{}, cfg.Languages, runtime.GOOS)
+			report := prereq.Run(runner.OSRunner{}, checks.ForLanguages(cfg.Languages), runtime.GOOS)
 			prereq.RenderText(out, report)
 			fmt.Fprintln(out)
 			if report.HasMissingRequired() {

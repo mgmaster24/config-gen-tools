@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mgmaster24/nvimforge/internal/fsutil"
-	"github.com/mgmaster24/nvimforge/internal/github"
+	"github.com/mgmaster24/config-gen-tools/forge/fsutil"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/github"
 )
 
 // currentVersionFile records which version directory under InstallRoot is

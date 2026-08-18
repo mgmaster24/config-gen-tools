@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/mgmaster24/nvimforge/internal/config"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/config"
 )
 
 func TestBuildTemplateData_NoLanguages_OnlyBaseline(t *testing.T) {

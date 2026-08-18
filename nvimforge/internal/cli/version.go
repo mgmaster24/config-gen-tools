@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/mgmaster24/nvimforge/internal/buildinfo"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/buildinfo"
 )
 
 func newVersionCmd() *cobra.Command {

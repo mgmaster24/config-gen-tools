@@ -3,8 +3,8 @@ package neovim
 import (
 	"fmt"
 
-	"github.com/mgmaster24/nvimforge/internal/fsutil"
-	"github.com/mgmaster24/nvimforge/internal/github"
+	"github.com/mgmaster24/config-gen-tools/forge/fsutil"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/github"
 )
 
 // Default install locations, following the XDG-ish convention of keeping

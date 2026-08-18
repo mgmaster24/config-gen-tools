@@ -4,7 +4,7 @@
 // else in this package aggregates and renders that data.
 package genconfig
 
-import "github.com/mgmaster24/nvimforge/internal/config"
+import "github.com/mgmaster24/config-gen-tools/nvimforge/internal/config"
 
 // FormatterSpec is one conform.nvim formatter entry: a mason package name
 // and the filetypes it formats.

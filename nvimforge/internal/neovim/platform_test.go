@@ -3,7 +3,7 @@ package neovim
 import (
 	"testing"
 
-	"github.com/mgmaster24/nvimforge/internal/github"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/github"
 )
 
 func TestSelectAsset_ExactMatch(t *testing.T) {

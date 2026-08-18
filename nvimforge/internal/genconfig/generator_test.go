@@ -5,8 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mgmaster24/nvimforge/internal/config"
-	"github.com/mgmaster24/nvimforge/internal/fsutil"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/config"
 )
 
 func TestRender_ProducesSortedRelPaths(t *testing.T) {
@@ -82,7 +81,7 @@ func TestWrite_FreshDeploy_NoBackup(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(deployPath, "init.lua")); err != nil {
 		t.Errorf("init.lua not written: %v", err)
 	}
-	if _, err := os.Stat(filepath.Join(deployPath, fsutil.GeneratedMarkerName)); err != nil {
+	if _, err := os.Stat(filepath.Join(deployPath, markerName)); err != nil {
 		t.Errorf("marker not written: %v", err)
 	}
 }

@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/mgmaster24/nvimforge/internal/runner/runnertest"
+	"github.com/mgmaster24/config-gen-tools/forge/runner/runnertest"
 )
 
 func TestDetectPackageManagers(t *testing.T) {

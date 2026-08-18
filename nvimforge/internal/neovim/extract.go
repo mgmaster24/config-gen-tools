@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mgmaster24/nvimforge/internal/github"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/github"
 )
 
 var httpClient = &http.Client{Timeout: 5 * time.Minute}

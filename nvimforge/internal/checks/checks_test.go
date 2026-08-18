@@ -1,9 +1,11 @@
-package prereq
+package checks
 
 import (
 	"testing"
 
-	"github.com/mgmaster24/nvimforge/internal/config"
+	"github.com/mgmaster24/config-gen-tools/forge/prereq"
+
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/config"
 )
 
 func TestLanguageChecks_CoversEveryLanguage(t *testing.T) {
@@ -15,7 +17,7 @@ func TestLanguageChecks_CoversEveryLanguage(t *testing.T) {
 }
 
 func TestChecks_HaveNameSeverityAndAtLeastOneDetectionMethod(t *testing.T) {
-	all := append([]Check{}, UniversalChecks...)
+	all := append([]prereq.Check{}, UniversalChecks...)
 	for _, checks := range LanguageChecks {
 		all = append(all, checks...)
 	}
@@ -30,7 +32,7 @@ func TestChecks_HaveNameSeverityAndAtLeastOneDetectionMethod(t *testing.T) {
 		if c.Binary == "" && c.Detect == nil {
 			t.Errorf("check %q has neither Binary nor Detect set", c.Name)
 		}
-		if c.Severity != SeverityRecommended && c.Severity != SeverityRequired {
+		if c.Severity != prereq.SeverityRecommended && c.Severity != prereq.SeverityRequired {
 			t.Errorf("check %q has unrecognized Severity %v", c.Name, c.Severity)
 		}
 	}

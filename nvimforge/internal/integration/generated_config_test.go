@@ -21,8 +21,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mgmaster24/nvimforge/internal/config"
-	"github.com/mgmaster24/nvimforge/internal/genconfig"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/config"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/genconfig"
 )
 
 // checkerLua parses each path passed as an argument without executing it.

@@ -10,7 +10,7 @@ func TestOSRunner_LookPath(t *testing.T) {
 		t.Error(`LookPath("go") should find the go binary running this test`)
 	}
 
-	if _, found := r.LookPath("nvimforge-definitely-not-a-real-binary"); found {
+	if _, found := r.LookPath("forge-definitely-not-a-real-binary"); found {
 		t.Error("LookPath should report false for a binary that doesn't exist")
 	}
 }
@@ -26,7 +26,7 @@ func TestOSRunner_Output(t *testing.T) {
 		t.Error("expected non-empty GOOS output")
 	}
 
-	if _, err := r.Output("nvimforge-definitely-not-a-real-binary"); err == nil {
+	if _, err := r.Output("forge-definitely-not-a-real-binary"); err == nil {
 		t.Error("Output should error for a nonexistent binary")
 	}
 }

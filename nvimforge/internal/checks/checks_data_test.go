@@ -1,10 +1,12 @@
-package prereq
+package checks
 
 import (
 	"testing"
 
-	"github.com/mgmaster24/nvimforge/internal/config"
-	"github.com/mgmaster24/nvimforge/internal/runner/runnertest"
+	"github.com/mgmaster24/config-gen-tools/forge/prereq"
+
+	"github.com/mgmaster24/config-gen-tools/forge/runner/runnertest"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/config"
 )
 
 func TestRun_UniversalOnly(t *testing.T) {
@@ -17,7 +19,7 @@ func TestRun_UniversalOnly(t *testing.T) {
 		WithPath("curl", "/usr/bin/curl").
 		WithPath("tar", "/usr/bin/tar")
 
-	report := Run(f, nil, "linux")
+	report := prereq.Run(f, ForLanguages(nil), "linux")
 
 	if len(report.Results) != len(UniversalChecks) {
 		t.Fatalf("got %d results, want %d (no languages selected)", len(report.Results), len(UniversalChecks))
@@ -37,7 +39,7 @@ func TestRun_MissingRequiredBlocksButRecommendedDoesNot(t *testing.T) {
 	// are Required; everything else is Recommended.
 	f := runnertest.New()
 
-	report := Run(f, nil, "linux")
+	report := prereq.Run(f, ForLanguages(nil), "linux")
 
 	if !report.HasMissingRequired() {
 		t.Error("HasMissingRequired() should be true: downloader and archiver are missing")
@@ -50,11 +52,11 @@ func TestRun_MissingRequiredBlocksButRecommendedDoesNot(t *testing.T) {
 
 	for _, res := range missing {
 		if res.Check.Name == "downloader" || res.Check.Name == "archiver" {
-			if res.Check.Severity != SeverityRequired {
-				t.Errorf("%q should be SeverityRequired", res.Check.Name)
+			if res.Check.Severity != prereq.SeverityRequired {
+				t.Errorf("%q should be prereq.SeverityRequired", res.Check.Name)
 			}
-		} else if res.Check.Severity != SeverityRecommended {
-			t.Errorf("%q should be SeverityRecommended", res.Check.Name)
+		} else if res.Check.Severity != prereq.SeverityRecommended {
+			t.Errorf("%q should be prereq.SeverityRecommended", res.Check.Name)
 		}
 	}
 }
@@ -62,7 +64,7 @@ func TestRun_MissingRequiredBlocksButRecommendedDoesNot(t *testing.T) {
 func TestRun_IncludesOnlySelectedLanguageChecks(t *testing.T) {
 	f := runnertest.New().WithPath("go", "/usr/bin/go")
 
-	report := Run(f, []config.Language{config.LangGo}, "linux")
+	report := prereq.Run(f, ForLanguages([]config.Language{config.LangGo}), "linux")
 
 	wantLen := len(UniversalChecks) + len(LanguageChecks[config.LangGo])
 	if len(report.Results) != wantLen {
@@ -71,10 +73,12 @@ func TestRun_IncludesOnlySelectedLanguageChecks(t *testing.T) {
 
 	var sawRustChecks, sawGoChecks bool
 	for _, res := range report.Results {
-		switch res.Check.Language {
-		case config.LangRust:
+		// Scope is the language key as a plain string: forge/prereq has no
+		// knowledge of config.Language.
+		switch res.Check.Scope {
+		case string(config.LangRust):
 			sawRustChecks = true
-		case config.LangGo:
+		case string(config.LangGo):
 			sawGoChecks = true
 		}
 	}
@@ -90,7 +94,7 @@ func TestRun_DetectFirstOfMatchesAlternateBinaryName(t *testing.T) {
 	// Debian names the fd binary "fdfind"; the fake only has that on PATH.
 	f := runnertest.New().WithPath("fdfind", "/usr/bin/fdfind")
 
-	report := Run(f, nil, "linux")
+	report := prereq.Run(f, ForLanguages(nil), "linux")
 
 	for _, res := range report.Results {
 		if res.Check.Name == "fd" {
@@ -108,8 +112,8 @@ func TestRun_DetectFirstOfMatchesAlternateBinaryName(t *testing.T) {
 
 func TestRun_PopulatesPackageManagers(t *testing.T) {
 	f := runnertest.New().WithPath("brew", "/opt/homebrew/bin/brew")
-	report := Run(f, nil, "darwin")
-	if len(report.PackageManagers) != 1 || report.PackageManagers[0] != PMBrew {
+	report := prereq.Run(f, ForLanguages(nil), "darwin")
+	if len(report.PackageManagers) != 1 || report.PackageManagers[0] != prereq.PMBrew {
 		t.Errorf("PackageManagers = %v, want [brew]", report.PackageManagers)
 	}
 }
@@ -123,7 +127,7 @@ func TestReport_MissingBlocking_CSharpWithoutDotnet(t *testing.T) {
 		WithPath("curl", "/usr/bin/curl").
 		WithPath("tar", "/usr/bin/tar")
 
-	report := Run(f, []config.Language{config.LangCSharp}, "linux")
+	report := prereq.Run(f, ForLanguages([]config.Language{config.LangCSharp}), "linux")
 
 	blocking := report.MissingBlocking()
 	if len(blocking) != 1 {
@@ -147,7 +151,7 @@ func TestReport_MissingBlocking_EmptyWhenDotnetPresent(t *testing.T) {
 		WithPath("tar", "/usr/bin/tar").
 		WithPath("dotnet", "/usr/bin/dotnet")
 
-	report := Run(f, []config.Language{config.LangCSharp}, "linux")
+	report := prereq.Run(f, ForLanguages([]config.Language{config.LangCSharp}), "linux")
 
 	if report.HasMissingBlocking() {
 		t.Errorf("HasMissingBlocking() should be false with dotnet present, got %+v", report.MissingBlocking())
@@ -162,7 +166,7 @@ func TestReport_MissingBlocking_UnselectedLanguageIsNotChecked(t *testing.T) {
 		WithPath("tar", "/usr/bin/tar").
 		WithPath("go", "/usr/bin/go")
 
-	report := Run(f, []config.Language{config.LangGo}, "linux")
+	report := prereq.Run(f, ForLanguages([]config.Language{config.LangGo}), "linux")
 
 	if report.HasMissingBlocking() {
 		t.Errorf("HasMissingBlocking() should be false when C# isn't selected, got %+v", report.MissingBlocking())

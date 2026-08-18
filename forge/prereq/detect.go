@@ -1,8 +1,7 @@
 package prereq
 
 import (
-	"github.com/mgmaster24/nvimforge/internal/config"
-	"github.com/mgmaster24/nvimforge/internal/runner"
+	"github.com/mgmaster24/config-gen-tools/forge/runner"
 )
 
 // Report is the outcome of running every relevant Check.
@@ -24,7 +23,7 @@ func (r Report) Missing() []CheckResult {
 }
 
 // HasMissingRequired reports whether any SeverityRequired check is
-// missing — the only condition that should ever make an nvimforge command
+// missing — the only condition that should ever make a command
 // fail based on this report.
 func (r Report) HasMissingRequired() bool {
 	for _, res := range r.Results {
@@ -52,17 +51,12 @@ func (r Report) HasMissingBlocking() bool {
 	return len(r.MissingBlocking()) > 0
 }
 
-// Run performs every UniversalCheck plus the LanguageChecks for langs,
-// returning a Report. It is pure aside from the injected Runner: no
-// printing, no process exit, so it can be unit tested and reused by both
-// `nvimforge doctor` and `nvimforge install`.
-func Run(r runner.Runner, langs []config.Language, goos string) Report {
-	checks := make([]Check, 0, len(UniversalChecks))
-	checks = append(checks, UniversalChecks...)
-	for _, lang := range langs {
-		checks = append(checks, LanguageChecks[lang]...)
-	}
-
+// Run detects every check in checks, returning a Report. Callers assemble
+// the list themselves — which checks always apply and which are conditional
+// is a tool's decision, not this package's. It is pure aside from the
+// injected Runner: no printing, no process exit, so it can be unit tested
+// and shared between a tool's `doctor` and `install` commands.
+func Run(r runner.Runner, checks []Check, goos string) Report {
 	results := make([]CheckResult, 0, len(checks))
 	for _, c := range checks {
 		found, versionInfo := c.detect(r)

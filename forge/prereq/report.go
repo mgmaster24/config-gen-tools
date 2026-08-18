@@ -35,13 +35,13 @@ func RenderText(w io.Writer, report Report) {
 	}
 
 	if report.HasMissingRequired() {
-		fmt.Fprintln(w, "\nnvimforge cannot continue until the required items above are installed.")
+		fmt.Fprintln(w, "\nCannot continue until the required items above are installed.")
 	}
 
 	for _, res := range report.MissingBlocking() {
 		fmt.Fprintf(w,
 			"\nWarning: %s is missing, so mason cannot install the %s tooling.\nThe generated config will be written, but %s support will fail to install until %s is on your PATH.\n",
-			res.Check.Name, res.Check.Language.DisplayName(), res.Check.Language.DisplayName(), res.Check.Name)
+			res.Check.Name, res.Check.scopeLabel(), res.Check.scopeLabel(), res.Check.Name)
 	}
 }
 
@@ -75,7 +75,7 @@ type jsonCheckResult struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Severity    string `json:"severity"`
-	Language    string `json:"language,omitempty"`
+	Scope       string `json:"scope,omitempty"`
 	Found       bool   `json:"found"`
 	VersionInfo string `json:"version_info,omitempty"`
 }
@@ -92,7 +92,7 @@ func RenderJSON(w io.Writer, report Report) error {
 			Name:        res.Check.Name,
 			Description: res.Check.Description,
 			Severity:    res.Check.Severity.String(),
-			Language:    string(res.Check.Language),
+			Scope:       res.Check.Scope,
 			Found:       res.Found,
 			VersionInfo: res.VersionInfo,
 		})

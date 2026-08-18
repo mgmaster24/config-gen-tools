@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/mgmaster24/nvimforge/internal/github"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/github"
 )
 
 // Platform identifies the OS/architecture combination Neovim is being

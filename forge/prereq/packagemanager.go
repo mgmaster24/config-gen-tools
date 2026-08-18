@@ -1,8 +1,8 @@
 package prereq
 
-import "github.com/mgmaster24/nvimforge/internal/runner"
+import "github.com/mgmaster24/config-gen-tools/forge/runner"
 
-// PackageManager identifies a system package manager nvimforge knows how to
+// PackageManager identifies a system package manager forge tools know how to
 // suggest install commands for.
 type PackageManager string
 

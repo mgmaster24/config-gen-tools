@@ -9,7 +9,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/mgmaster24/nvimforge/internal/fsutil"
+	"github.com/mgmaster24/config-gen-tools/forge/fsutil"
 )
 
 const (
@@ -72,9 +72,13 @@ func Render(data TemplateData) ([]File, error) {
 // successful generation so future re-generations of the same deployPath
 // are recognized as nvimforge's own prior output rather than backed up
 // again.
+// markerName identifies this tool's own generated output. Each forge tool
+// uses its own so one never mistakes another's deploy directory for its own.
+var markerName = fsutil.MarkerName("nvimforge")
+
 func Write(files []File, deployPath string, backup bool) (backedUpTo string, err error) {
 	if backup {
-		needsBackup, err := fsutil.NeedsBackup(deployPath)
+		needsBackup, err := fsutil.NeedsBackup(deployPath, markerName)
 		if err != nil {
 			return "", err
 		}
@@ -93,7 +97,7 @@ func Write(files []File, deployPath string, backup bool) (backedUpTo string, err
 		}
 	}
 
-	markerPath := filepath.Join(deployPath, fsutil.GeneratedMarkerName)
+	markerPath := filepath.Join(deployPath, markerName)
 	if err := fsutil.AtomicWriteFile(markerPath, []byte(`{"generated_by":"nvimforge"}`), 0o644); err != nil {
 		return backedUpTo, fmt.Errorf("writing generated marker: %w", err)
 	}

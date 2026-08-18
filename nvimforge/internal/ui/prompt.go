@@ -6,7 +6,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 
-	"github.com/mgmaster24/nvimforge/internal/config"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/config"
 )
 
 // PromptConfig runs an interactive form asking which languages to set up,

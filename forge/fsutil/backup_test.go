@@ -6,10 +6,14 @@ import (
 	"testing"
 )
 
+// testMarker stands in for a real tool's marker, e.g.
+// fsutil.MarkerName("nvimforge").
+const testMarker = ".testtool-generated"
+
 func TestNeedsBackup(t *testing.T) {
 	t.Run("nonexistent path", func(t *testing.T) {
 		dir := t.TempDir()
-		got, err := NeedsBackup(filepath.Join(dir, "missing"))
+		got, err := NeedsBackup(filepath.Join(dir, "missing"), testMarker)
 		if err != nil {
 			t.Fatalf("NeedsBackup: %v", err)
 		}
@@ -24,7 +28,7 @@ func TestNeedsBackup(t *testing.T) {
 		if err := os.Mkdir(target, 0o755); err != nil {
 			t.Fatalf("Mkdir: %v", err)
 		}
-		got, err := NeedsBackup(target)
+		got, err := NeedsBackup(target, testMarker)
 		if err != nil {
 			t.Fatalf("NeedsBackup: %v", err)
 		}
@@ -33,7 +37,7 @@ func TestNeedsBackup(t *testing.T) {
 		}
 	})
 
-	t.Run("directory with nvimforge marker", func(t *testing.T) {
+	t.Run("directory with tool marker", func(t *testing.T) {
 		dir := t.TempDir()
 		target := filepath.Join(dir, "generated")
 		if err := os.Mkdir(target, 0o755); err != nil {
@@ -42,15 +46,15 @@ func TestNeedsBackup(t *testing.T) {
 		if err := os.WriteFile(filepath.Join(target, "init.lua"), []byte("-- x"), 0o644); err != nil {
 			t.Fatalf("WriteFile: %v", err)
 		}
-		if err := os.WriteFile(filepath.Join(target, GeneratedMarkerName), []byte("{}"), 0o644); err != nil {
+		if err := os.WriteFile(filepath.Join(target, testMarker), []byte("{}"), 0o644); err != nil {
 			t.Fatalf("WriteFile marker: %v", err)
 		}
-		got, err := NeedsBackup(target)
+		got, err := NeedsBackup(target, testMarker)
 		if err != nil {
 			t.Fatalf("NeedsBackup: %v", err)
 		}
 		if got {
-			t.Error("want false when GeneratedMarkerName is present")
+			t.Error("want false when the tool's own marker is present")
 		}
 	})
 
@@ -63,7 +67,7 @@ func TestNeedsBackup(t *testing.T) {
 		if err := os.WriteFile(filepath.Join(target, "init.lua"), []byte("-- hand written"), 0o644); err != nil {
 			t.Fatalf("WriteFile: %v", err)
 		}
-		got, err := NeedsBackup(target)
+		got, err := NeedsBackup(target, testMarker)
 		if err != nil {
 			t.Fatalf("NeedsBackup: %v", err)
 		}
@@ -78,7 +82,7 @@ func TestNeedsBackup(t *testing.T) {
 		if err := os.WriteFile(target, []byte("x"), 0o644); err != nil {
 			t.Fatalf("WriteFile: %v", err)
 		}
-		got, err := NeedsBackup(target)
+		got, err := NeedsBackup(target, testMarker)
 		if err != nil {
 			t.Fatalf("NeedsBackup: %v", err)
 		}

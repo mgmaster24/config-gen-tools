@@ -5,9 +5,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/mgmaster24/nvimforge/internal/config"
-	"github.com/mgmaster24/nvimforge/internal/prereq"
-	"github.com/mgmaster24/nvimforge/internal/runner"
+	"github.com/mgmaster24/config-gen-tools/forge/prereq"
+	"github.com/mgmaster24/config-gen-tools/forge/runner"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/checks"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/config"
 )
 
 func newDoctorCmd() *cobra.Command {
@@ -26,7 +27,7 @@ func newDoctorCmd() *cobra.Command {
 				return err
 			}
 
-			report := prereq.Run(runner.OSRunner{}, langs, runtime.GOOS)
+			report := prereq.Run(runner.OSRunner{}, checks.ForLanguages(langs), runtime.GOOS)
 
 			if asJSON {
 				if err := prereq.RenderJSON(cmd.OutOrStdout(), report); err != nil {

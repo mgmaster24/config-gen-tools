@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mgmaster24/nvimforge/internal/config"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/config"
 )
 
 func TestResolveDoctorLanguages_LangFlagsWin(t *testing.T) {

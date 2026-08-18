@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mgmaster24/nvimforge/internal/github"
-	"github.com/mgmaster24/nvimforge/internal/neovim"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/github"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/neovim"
 )
 
 type fakeReleaseClient struct{ tag string }

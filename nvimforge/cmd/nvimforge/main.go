@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mgmaster24/nvimforge/internal/cli"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/cli"
 )
 
 func main() {

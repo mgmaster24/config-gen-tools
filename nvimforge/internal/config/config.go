@@ -13,7 +13,7 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 
-	"github.com/mgmaster24/nvimforge/internal/fsutil"
+	"github.com/mgmaster24/config-gen-tools/forge/fsutil"
 )
 
 // DefaultDeployPath is where the generated Neovim config is written unless

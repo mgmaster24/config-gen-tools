@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/mgmaster24/nvimforge/internal/config"
+	"github.com/mgmaster24/config-gen-tools/nvimforge/internal/config"
 )
 
 func writeTestConfig(t *testing.T, path string, cfg config.Config) {
