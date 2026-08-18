@@ -23,9 +23,9 @@ builds:
         goarch: arm64
     ldflags:
       - -s -w
-      - -X github.com/mgmaster24/nvimforge/internal/buildinfo.Version={{.Version}}
-      - -X github.com/mgmaster24/nvimforge/internal/buildinfo.Commit={{.Commit}}
-      - -X github.com/mgmaster24/nvimforge/internal/buildinfo.Date={{.Date}}
+      - -X github.com/mgmaster24/config-gen-tools/nvimforge/internal/buildinfo.Version={{.Version}}
+      - -X github.com/mgmaster24/config-gen-tools/nvimforge/internal/buildinfo.Commit={{.Commit}}
+      - -X github.com/mgmaster24/config-gen-tools/nvimforge/internal/buildinfo.Date={{.Date}}
 
 archives:
   - id: nvimforge
