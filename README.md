@@ -64,22 +64,43 @@ release workflow uses. It also means `go install` works:
 go install github.com/mgmaster24/config-gen-tools/nvimforge/cmd/nvimforge@latest
 ```
 
-> **Outstanding:** `forge` has no published tag yet, so each tool's `go.mod`
-> carries a `replace` pointing at `../forge`. That works for local development
-> and CI (via `go.work`), but a local `replace` makes `go install` fail for
-> anyone outside the repo. Tag and push `forge/v0.1.0`, then swap each
-> `replace` for a real version.
+`forge` is published at `v0.1.0`, and each tool requires it by version. There
+are **no `replace` directives** — a local `replace` would make `go install`
+fail for anyone outside the repo, so the tools are verified to build with
+`GOWORK=off` against the published module.
 
-`go.work` at the repo root is for local development only — it lets edits
-across modules build together without per-module `replace` directives.
+`go.work` at the repo root is for local development only. It lets edits
+across modules build together, but nothing depends on it: CI and `go install`
+resolve `forge` from its tag.
+
+### Releasing a forge change
+
+`forge` is a library, so it ships no binary — its "release" is the tag alone:
+
+```sh
+git tag forge/v0.2.0 && git push origin forge/v0.2.0
+```
+
+Then bump `github.com/mgmaster24/config-gen-tools/forge` in each dependent
+tool's `go.mod` and run `go mod tidy`. Because `go.work` shadows the required
+version locally, verify with `GOWORK=off go build ./...` before pushing —
+that's the only way to catch a tool still pinned to an older forge.
+
+The release workflow recognizes library tags: a module with no
+`.goreleaser.yaml` is reported as a notice and skipped rather than failing
+the run.
 
 ## Adding a new tool
 
 1. Create `<tool>/` with `go.mod` declaring
-   `github.com/mgmaster24/config-gen-tools/<tool>`.
+   `github.com/mgmaster24/config-gen-tools/<tool>`, requiring
+   `github.com/mgmaster24/config-gen-tools/forge` at its current version.
+   Don't add a `replace` — see above.
 2. Add `.goreleaser.yaml` and `.golangci.yml` (copy an existing pair).
 3. Add `<tool>` to `go.work`.
 4. Optionally add `scripts/ci-smoke.sh` and `internal/integration`.
+5. Optionally add `install.sh` / `install.ps1` (copy an existing pair and
+   change `TOOL`, the env var prefixes, and the closing hint).
 
 No CI changes needed — `discover` finds every directory containing a
 `go.mod` and fans the jobs out over it.
